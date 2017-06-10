@@ -26,6 +26,8 @@ namespace AR_RenderEngine {
         Camera(int , int);
         ~Camera();
         glm::vec3 position;
+        glm::vec3 cameraFront;
+        glm::vec3 cameraUp;
         
         glm::mat4 GetViewMat4f();
         glm::mat4 GetProjectionMat4f();

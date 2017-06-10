@@ -14,6 +14,7 @@
 #include "Shader.hpp"
 #include "Transform.hpp"
 #include "Camera.hpp"
+#include "Texture.hpp"
 
 namespace AR_RenderEngine {
     
@@ -25,19 +26,35 @@ namespace AR_RenderEngine {
             GLfloat y;
             GLfloat z;
         }position;
+        struct Color
+        {
+            GLubyte r;
+            GLubyte b;
+            GLubyte g;
+            GLubyte a;
+        }color;
+        struct UV
+        {
+            GLfloat u;
+            GLfloat v;
+        }uv;
     };
-    
-    class Mesh {
+        class Mesh {
         
     private:
         Vertex* vertices;
+        GLushort* indices;
         
     public:
         unsigned int m_drawCount= 0;
         GLuint m_VAO;
         GLuint m_VBO;
+        GLuint m_IBO;
         
-        Mesh(Vertex* vertices, int drawCount);
+        //Mesh(Vertex *vertices, int drawCount);
+        Mesh(Vertex *vertices , GLushort *indices,  int drawCount);
+        
+        
         void Draw();
         ~Mesh();
     };
@@ -56,6 +73,7 @@ namespace AR_RenderEngine {
         AR_RenderEngine::Shader* shader;
         AR_RenderEngine::Transform* transform;
         Camera* mainCamera;
+        Texture* texture;
         
     public:
         GameObject();
@@ -65,6 +83,8 @@ namespace AR_RenderEngine {
         void SetMesh(Mesh* mesh);
         void SetShaderProgram();
         void SetMainCamera(Camera* mainCamera);
+        void SetTexture(Texture* texture);
+        
         void Draw();
     };
 }

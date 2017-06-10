@@ -11,7 +11,10 @@
 
 namespace AR_RenderEngine {
     
-    Mesh::Mesh(Vertex* vertices, int drawCount) : m_VAO(0) , m_VBO(0){
+    Mesh::Mesh(Vertex* vertices, GLushort *indices , int drawCount) : m_VAO(0) , m_VBO(0) , m_IBO(0){
+        this->vertices;
+        this->indices = indices;
+        
         
         m_drawCount = drawCount;
         glGenVertexArrays(1 , &m_VAO);
@@ -20,14 +23,27 @@ namespace AR_RenderEngine {
         glGenBuffers(1, &m_VBO);
         glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
         
-        glBufferData(GL_ARRAY_BUFFER, drawCount * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
+        glGenBuffers(1, &m_IBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER , m_IBO);
         
-        glVertexAttribPointer(0, 3 , GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+        glBufferData(GL_ARRAY_BUFFER, drawCount * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawCount * sizeof(indices[0]) , indices , GL_STATIC_DRAW);
+        
+        
+        glVertexAttribPointer(0  ,  3  ,  GL_FLOAT          , GL_FALSE  , (sizeof(Vertex)) , (void*)0) ;
+        glVertexAttribPointer(1  ,  4  ,  GL_UNSIGNED_BYTE  , GL_TRUE   , (sizeof(Vertex)) , (void*)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(2  ,  2  ,  GL_FLOAT          , GL_FALSE  , (sizeof(Vertex)) , (void*)(3 * sizeof(GLfloat) + 4 * sizeof(GLubyte)));
+        
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+        
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
     }
     
     Mesh::~Mesh(){
@@ -38,16 +54,23 @@ namespace AR_RenderEngine {
     void Mesh::Draw(){
         glBindVertexArray(m_VAO);
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
         
-        glDrawArrays(GL_TRIANGLES, 0, m_drawCount);
+     //   glDrawArrays(GL_TRIANGLES, 0, m_drawCount);
+        glDrawElements(GL_TRIANGLES, m_drawCount, GL_UNSIGNED_SHORT,0);
         
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
         glBindVertexArray(0);
     }
     
     GameObject::GameObject(){
         shader = new  AR_RenderEngine::Shader("vertexShader.vsh" , "fragmentShader.fsh");
         shader->GLBindAttribute("vertPosition", 0);
+        shader->GLBindAttribute("color", 1);
+        shader->GLBindAttribute("uv", 2);
         shader->BindShader();
         m_transformUniformLocation = shader->GetUniformLocation("modelMatrix");
         m_viewMat4UniformLocation = shader->GetUniformLocation("viewMatrix");
@@ -70,6 +93,7 @@ namespace AR_RenderEngine {
     }
     
     void GameObject::BindWithCamera(){
+        glUniformMatrix4fv(m_transformUniformLocation, 1, GL_FALSE , &(transform->GetModelMatrix()[0][0]));
         glUniformMatrix4fv(m_projectionMat4UniformLocation, 1, GL_FALSE, &(mainCamera->GetProjectionMat4f()[0][0]));
         glUniformMatrix4fv(m_viewMat4UniformLocation, 1, GL_FALSE, &(mainCamera->GetViewMat4f()[0][0]));
     }
@@ -79,16 +103,22 @@ namespace AR_RenderEngine {
      
     }
     
-    void GameObject::SetMesh(Mesh* mesh){
+    void GameObject::SetMesh(Mesh *mesh){
         this->mesh = mesh;
+    }
+    
+    void GameObject::SetTexture(Texture *texture)
+    {
+        this->texture = texture;
     }
     
     void GameObject::Draw()
     {
         shader->BindShader();
-        this->transform->BindTransform(m_transformUniformLocation);
         this->BindWithCamera();
+        this->texture->BindTexture(0);
         this->mesh->Draw();
+        this->texture->UnBindTexture();
         shader->UnbindShader();
     }
 }

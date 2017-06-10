@@ -19,13 +19,14 @@ namespace AR_RenderEngine{
     class Transform {
         
     private:
-        glm::mat4 GetModelMatrix();
+        
     public:
         
         glm::vec3 m_position;
         glm::vec3 m_rotation;
         glm::vec3 m_scale;
         
+        glm::mat4 GetModelMatrix();
         void BindTransform(GLint uniformLocation);
         void Translate(glm::vec3);
         void Rotate(glm::vec3);

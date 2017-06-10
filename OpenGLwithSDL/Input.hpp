@@ -21,7 +21,7 @@ namespace AR_RenderEngine {
         static bool keyDown[1024];
         static bool keyRepeat[1024];
         static bool keyUp[1024];
-        
+        static SDL_Event m_sdlEvent;
     public:
         static void HandleKeyEvent(SDL_Event sdlEvent);
         

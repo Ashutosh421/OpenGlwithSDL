@@ -54,7 +54,7 @@ namespace AR_RenderEngine {
     }
     
     void Transform::BindTransform(GLint uniformLocation){
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, &(GetModelMatrix()[0][0]));
+        //glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, &(GetModelMatrix()[0][0]));
     }
     
     
